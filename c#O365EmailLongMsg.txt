@@ -1,0 +1,75 @@
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
+using System.Threading;
+using System.ComponentModel;
+using System.Data.SqlClient;
+using System.Data;
+
+namespace emailO365LongMsg
+{
+    class Program
+    {
+static void Main(string[] args)
+        {
+
+// Ammend to add your Office 365 email address + password
+            string msgFrom = "yourO365email@emailSuffix";
+            string EMpassword = "yourEMpssword";
+
+
+            var msgTo = args.SingleOrDefault(arg => arg.StartsWith("To:"));
+                if (!string.IsNullOrEmpty(msgTo))
+                {
+                msgTo = msgTo.Replace("To:", "");
+                }
+
+
+string msgBody = "x";
+string msgSub = "x";
+
+string cs = "server=(local); uid=emailRead; pwd=Dani!G!H; database=siteMon";
+            SqlConnection sqlCon1 = new SqlConnection(cs);
+            sqlCon1.Open();
+
+            SqlCommand cmdCheck = new SqlCommand("select top 1 msg , MsgSub from tbl_emailMsg where msgStat = 0", sqlCon1);
+                    cmdCheck.CommandType = CommandType.Text;
+
+                    SqlDataReader checker;
+                    checker = cmdCheck.ExecuteReader();
+                    if (checker.Read())
+                    {
+                        msgBody = checker[0].ToString();
+                        msgSub = checker[1].ToString();
+
+                    }
+       checker.Close();
+
+
+       MailMessage Msg = new MailMessage();
+       Msg.Subject = msgSub;
+       Msg.Body = msgBody;
+       MailAddress fromMail = new MailAddress(msgFrom);
+       Msg.From = fromMail;
+
+       foreach (var address in msgTo.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries))
+       {
+           Msg.To.Add(address);
+       }
+
+
+            SmtpClient smtp = new SmtpClient();
+            smtp.Host = "smtp.office365.com";
+            smtp.Port = 587;
+
+            smtp.Credentials = new NetworkCredential(msgFrom, EMpassword);
+            smtp.EnableSsl = true;
+            Console.WriteLine("Sending email...");
+            smtp.Send(Msg);
+
+
+        }
+    }
+}
