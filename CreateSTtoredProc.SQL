@@ -186,8 +186,8 @@ End -- issue
 if @qEmail = 'backup'
 Begin
 set @esub  = @IPorSiteName + ' network back up'
-set @emsg = 'No major currently issues detected on the ' + @IPorSiteName + ' network.'
-End
+set @emsg = 'No major  issues currently detected on the ' + @IPorSiteName + ' network.'
+Endcurrently 
 
 if @qEmail = 'down'
 Begin
